@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const userRouter = require('./routes/userRouter');
+const courseRouter = require('./routes/courserRouter');
 
 app.use(express.json());
 const allowedOrigins = ["http://localhost:5173"] 
@@ -15,7 +16,8 @@ app.use(cors({
 }))
 app.use(cookieParser())
 
-app.use("/api", userRouter)
+app.use("/api/users", userRouter)
+app.use("/api/courses", courseRouter)
 
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
