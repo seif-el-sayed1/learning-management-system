@@ -19,6 +19,7 @@ app.use(cookieParser())
 app.use("/api/users", userRouter)
 app.use("/api/courses", courseRouter)
 
+
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         console.log('Connected to MongoDB');

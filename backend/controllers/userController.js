@@ -66,7 +66,6 @@ const login = async (req, res) => {
         return res.json({Success: false, message: error.message})
     }
 }
-
 const logout = async (req, res) => {
     try {
         res.clearCookie('token', {httpOnly:true, secure:true, sameSite:"strict"})
@@ -75,7 +74,6 @@ const logout = async (req, res) => {
         return res.json({Success: false, message: error.message})
     }
 }
-
 const sendVerifyOtp = async (req, res) => {
     try {
         const user = await users.findById(req.user.id)
@@ -100,7 +98,6 @@ const sendVerifyOtp = async (req, res) => {
         return res.json({Success: false, message: error.message})
     }
 }
-
 const verifyEmail = async(req, res) => {
     const {otp} = req.body
     try {
@@ -171,7 +168,6 @@ const resetPassword = async (req, res) => {
         return res.json({Success: false, message: error.message})
     }
 }
-
 const userData = async (req, res) => {
     try {
         const user = await users.findById(req.user.id)
@@ -186,7 +182,6 @@ const userData = async (req, res) => {
         return res.json({Success: false, message: error.message})
     }
 }
-
 const isAuthenticated = async (req, res) => {
     try {
         return res.json({Success: true})
