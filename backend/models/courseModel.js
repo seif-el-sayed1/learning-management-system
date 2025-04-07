@@ -18,6 +18,12 @@ const courseSchema = new mongoose.Schema({
         required: true,
         min: 0
     },
+    discount: {
+        type: Number,
+        default: 0,
+        min: 0,
+        max: 100
+    },
     instructor: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
@@ -34,13 +40,15 @@ const courseSchema = new mongoose.Schema({
             required: true
         },
         url: [{
-            type: String,
-            required: true
+            link: {
+                type: String,
+                required: true
+            },
+            isFree: {
+                type: Boolean,
+                default: false
+            }
         }],
-        isFree: {
-            type: Boolean,
-            default: false
-        },
         duration: {
             type: Number,
             required: true
