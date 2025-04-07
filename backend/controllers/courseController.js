@@ -2,9 +2,13 @@ const Course = require("../models/courseModel")
 const User = require("../models/userModel")
 const Student = require("../models/studentModel")
 const Instructor = require("../models/instructorModel")
+const dayjs = require("dayjs")
 
+
+// instructor 
 const addCourse = async (req, res) => {
-    const { name, description, price, chapters } = req.body
+    const { name, description, price, discount, chapters } = req.body
+    const image = req.image
 
     const instructor = await User.findById(req.user.id)
     if (!instructor || instructor.role !== "instructor") {
@@ -13,7 +17,7 @@ const addCourse = async (req, res) => {
             message: "Instructor not found"
         })
     }
-    if (!name || !description || !price || !chapters || !Array.isArray(chapters)) {
+    if (!name || !description || !price || !chapters || !Array.isArray(chapters) || !image) {
         return res.status(400).json({ success: false, 
             message: "Please provide all required fields: name, description, price, and chapters"});
     }
@@ -25,13 +29,17 @@ const addCourse = async (req, res) => {
     });
 
     try {
+        const createdAt = dayjs().format("YYYY-MM-DD")
+        const finalPrice = price - (price * (discount || 0)) / 100;
+
         const newCourse  = await new Course({
             image: req.image,
             name,
             description,
-            price,
+            price: finalPrice,
             instructor: req.user.id,
             chapters,
+            createdAt,
         })
         await newCourse.save()
         return res.status(201).json({success: true, message: "Course created successfully",data: newCourse})
@@ -59,8 +67,28 @@ const getCourseById = async (req, res) => {
         return res.status(400).json({success: false,message: error.message})
     }
 }
-const enrollCourse = async (req, res) => {
+const getCourseBySearch = async (req, res) => {
+    const { search } = req.query;  
     
+    if (!search) {
+        return res.status(400).json({ success: false, message: "Search term is required" });
+    }
+
+    try {
+        const courses = await Course.find({
+            name: { $regex: search, $options: 'i' }
+        });
+        if (courses.length === 0) {
+            return res.status(404).json({success: false,message: "No courses found"})
+        }
+        return res.status(200).json({success: true,message: "Courses fetched successfully",data: courses})
+    } catch (error) {
+        return res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// student 
+const enrollCourse = async (req, res) => {
     try {
         const {courseId} = req.body
         const student = await Student.findById(req.user.id)
@@ -80,9 +108,13 @@ const enrollCourse = async (req, res) => {
 
         const instructor = await Instructor.findById(course.instructor)
         instructor.students.push(req.user.id)
-        await instructor.save() 
+        
+        const finalPrice = course.price - (course.price * (course.discount || 0)) / 100;
+        instructor.totalEarnings += finalPrice;
 
-        course.students.push(req.user.id)
+        await instructor.save() 
+        const enrolledAt = dayjs().format("YYYY-MM-DD") 
+        course.students.push({user: req.user.id, enrolledAt})
         await course.save()
         
         return res.status(200).json({success: true, message: "Course enrolled successfully"})
@@ -139,7 +171,6 @@ const addRating = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Error adding rating', error: error.message });
     }
 };
-
 const getRatings = async (req, res) => {
     try {
         const courseId = req.params.courseId;  
@@ -167,7 +198,6 @@ const getRatings = async (req, res) => {
         return res.status(500).json({ success: false, message: 'Error fetching ratings', error: error.message });
     }
 };
-
 const getStudentRatings = async (req, res) => {
     try {
         const courseId = req.params.courseId;  
@@ -218,5 +248,6 @@ module.exports = {
     getEnrolledCourses,
     addRating,
     getRatings,
-    getStudentRatings
+    getStudentRatings,
+    getCourseBySearch
 }

@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const User = require('./userModel');
 
 const courseSchema = new mongoose.Schema({
     image: {
@@ -30,9 +31,15 @@ const courseSchema = new mongoose.Schema({
         required: true
     },
     students: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'User',
-        default: []
+        user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
+            required: true
+        },
+        enrolledAt: {
+            type: Date,
+            default: Date.now
+        }
     }],
     chapters: [{
         title: {
@@ -54,6 +61,10 @@ const courseSchema = new mongoose.Schema({
             required: true
         }
     }],
+    createdAt: {
+        type: Date,   
+        default: Date.now
+    },
     ratings: [{
         user: {
             type: mongoose.Schema.Types.ObjectId,
