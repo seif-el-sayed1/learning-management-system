@@ -40,4 +40,6 @@ router.route('/add-rating/:courseId').post(verifyToken, courseController.addRati
 router.route('/get-ratings/:courseId').get(verifyToken, courseController.getRatings)
 router.route('/get-student-ratings/:courseId').get(verifyToken, courseController.getStudentRatings)
 
+router.route('/search-courses').get(courseController.getCourseBySearch) 
+
 module.exports = router
